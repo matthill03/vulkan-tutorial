@@ -1,0 +1,32 @@
+#pragma once
+
+#define GLFW_INCLUDE_VULKAN
+#include "glfw3.h"
+#include <string>
+#include <stdexcept>
+
+namespace ember {
+
+class Window {
+
+    public:
+        Window(int width, int height, std::string name);
+        Window(const Window &) = delete;
+        Window &operator =(const Window &) = delete;
+        ~Window();
+
+        bool ShouldClose() {return glfwWindowShouldClose(_window);};
+        void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+
+    private:
+        int _width;
+        int _height;
+
+        std::string _name;
+        GLFWwindow* _window;
+
+        void InitWindow();
+
+
+};
+}

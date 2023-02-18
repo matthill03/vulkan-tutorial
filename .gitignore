@@ -1,0 +1,7 @@
+bin/
+.vscode
+src/vendors
+*.frag.spv
+*.vert.spv
+*.sh
+Makefile
