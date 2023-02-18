@@ -1,0 +1,1 @@
+This is a very basic vulkan engine that I am creating to learn more about graphics apis after my uni module Graphics 1. Where we created a graphics scene in DirectX11.
