@@ -1,4 +1,4 @@
-#include "pipeline.hpp"
+#include "include/pipeline.hpp"
 
 // std
 #include <fstream>
