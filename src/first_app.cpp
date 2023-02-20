@@ -6,6 +6,7 @@
 namespace ember {
 
     FirstApp::FirstApp() {
+        LoadModels();
         CreatePipelineLayout();
         CreatePipeline();
         CreateCommandBuffers();
@@ -22,6 +23,16 @@ namespace ember {
         }
 
         vkDeviceWaitIdle(_device.GetDevice());
+    }
+
+    void FirstApp::LoadModels() {
+        std::vector<Model::Vertex> verticies = {
+            {{0.0f, -0.5f}},
+            {{0.5f, 0.5f}},
+            {{-0.5f, 0.5f}}
+        };
+
+        _model = std::make_unique<Model>(_device, verticies);
     }
 
     void FirstApp::CreatePipelineLayout() {
@@ -82,7 +93,8 @@ namespace ember {
             vkCmdBeginRenderPass(_commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
             _pipeline->Bind(_commandBuffers[i]);
-            vkCmdDraw(_commandBuffers[i], 3, 1, 0, 0);
+            _model->Bind(_commandBuffers[i]);
+            _model->Draw(_commandBuffers[i]);
 
             vkCmdEndRenderPass(_commandBuffers[i]);
             if (vkEndCommandBuffer(_commandBuffers[i]) != VK_SUCCESS) {
