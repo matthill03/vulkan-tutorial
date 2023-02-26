@@ -19,14 +19,19 @@ class Window {
         void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
         VkExtent2D GetExtent() { return {static_cast<uint32_t>(_width), static_cast<uint32_t>(_height)}; };
 
+        bool WasWindowResized() {return _frameBufferResized; };
+        void ResetWindowResizedFlag() {_frameBufferResized = false; };
+
     private:
         int _width;
         int _height;
+        bool _frameBufferResized = false;
 
         std::string _name;
         GLFWwindow* _window;
 
         void InitWindow();
+        static void FrameBufferResizedCallback(GLFWwindow* window, int width, int height);
 
 
 };

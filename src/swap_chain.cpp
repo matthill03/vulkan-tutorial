@@ -11,8 +11,19 @@
 
 namespace ember {
 
-SwapChain::SwapChain(Device &deviceRef, VkExtent2D extent)
-    : _device{deviceRef}, _windowExtent{extent} {
+SwapChain::SwapChain(Device &deviceRef, VkExtent2D windowExtent)
+    : _device{deviceRef}, _windowExtent{windowExtent} {
+  Init();
+}
+
+SwapChain::SwapChain(Device& deviceRef, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previousSwapChain) 
+    : _device{deviceRef}, _windowExtent{windowExtent}, _oldSwapChain{previousSwapChain} {
+  Init();
+  
+  _oldSwapChain = nullptr;
+}
+
+void SwapChain::Init() {
   CreateSwapChain();
   CreateImageViews();
   CreateRenderPass();
@@ -162,7 +173,7 @@ void SwapChain::CreateSwapChain() {
   createInfo.presentMode = presentMode;
   createInfo.clipped = VK_TRUE;
 
-  createInfo.oldSwapchain = VK_NULL_HANDLE;
+  createInfo.oldSwapchain = _oldSwapChain == nullptr ? VK_NULL_HANDLE : _oldSwapChain->_swapChain;
 
   if (vkCreateSwapchainKHR(_device.GetDevice(), &createInfo, nullptr, &_swapChain) != VK_SUCCESS) {
     throw std::runtime_error("failed to create swap chain!");
@@ -362,7 +373,7 @@ void SwapChain::CreateSyncObjects() {
 VkSurfaceFormatKHR SwapChain::ChooseSwapSurfaceFormat(
     const std::vector<VkSurfaceFormatKHR> &availableFormats) {
   for (const auto &availableFormat : availableFormats) {
-    if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM &&
+    if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB &&
         availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
       return availableFormat;
     }

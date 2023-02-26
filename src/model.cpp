@@ -23,12 +23,17 @@ namespace ember {
     }
 
     std::vector<VkVertexInputAttributeDescription> Model::Vertex::GetAttributeDescriptions() {
-        std::vector<VkVertexInputAttributeDescription> attributeDesctiptions(1);
+        std::vector<VkVertexInputAttributeDescription> attributeDesctiptions(2);
 
         attributeDesctiptions[0].binding = 0;
         attributeDesctiptions[0].location = 0;
         attributeDesctiptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-        attributeDesctiptions[0].offset = 0;
+        attributeDesctiptions[0].offset = offsetof(Vertex, position);
+
+        attributeDesctiptions[1].binding = 0;
+        attributeDesctiptions[1].location = 1;
+        attributeDesctiptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDesctiptions[1].offset = offsetof(Vertex, colour);
         return attributeDesctiptions;
     }
 

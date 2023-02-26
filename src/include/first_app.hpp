@@ -30,11 +30,14 @@ class FirstApp {
         void CreatePipelineLayout();
         void CreatePipeline();
         void CreateCommandBuffers();
+        void FreeCommandBuffers();
         void DrawFrame();
+        void RecreateSwapChain();
+        void RecordCommandBuffer(int imageIndex);
 
         Window _window{width, height, "Hi There matey"};
         Device _device{_window};
-        SwapChain _swapChain {_device, _window.GetExtent()};
+        std::unique_ptr<SwapChain> _swapChain;
         std::unique_ptr<Pipeline> _pipeline;
         VkPipelineLayout _pipelineLayout;
         std::vector<VkCommandBuffer> _commandBuffers;

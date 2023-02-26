@@ -8,6 +8,7 @@
 // std lib headers
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace ember {
 
@@ -16,10 +17,11 @@ class SwapChain {
   static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
   SwapChain(Device &deviceRef, VkExtent2D windowExtent);
+  SwapChain(Device &deviceRef, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previousSwapChain);
   ~SwapChain();
 
   SwapChain(const SwapChain &) = delete;
-  void operator=(const SwapChain &) = delete;
+  SwapChain& operator=(const SwapChain &) = delete;
 
   VkFramebuffer GetFrameBuffer(int index) { return _swapChainFramebuffers[index]; }
   VkRenderPass GetRenderPass() { return _renderPass; }
@@ -39,6 +41,7 @@ class SwapChain {
   VkResult SubmitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
 
  private:
+  void Init();
   void CreateSwapChain();
   void CreateImageViews();
   void CreateDepthResources();
@@ -69,6 +72,7 @@ class SwapChain {
   VkExtent2D _windowExtent;
 
   VkSwapchainKHR _swapChain;
+  std::shared_ptr<SwapChain> _oldSwapChain;
 
   std::vector<VkSemaphore> _imageAvailableSemaphores;
   std::vector<VkSemaphore> _renderFinishedSemaphores;

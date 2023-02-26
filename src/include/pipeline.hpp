@@ -7,14 +7,15 @@
 namespace ember {
 
 struct PipelineConfigInfo {
-    VkViewport viewport;
-    VkRect2D scissor;
+    VkPipelineViewportStateCreateInfo viewportInfo;
     VkPipelineInputAssemblyStateCreateInfo inputAssembalyInfo;
     VkPipelineRasterizationStateCreateInfo rasterizationInfo;
     VkPipelineMultisampleStateCreateInfo multisampleInfo;
     VkPipelineColorBlendAttachmentState colourBlendAttachment;
     VkPipelineColorBlendStateCreateInfo colourBlendInfo;
     VkPipelineDepthStencilStateCreateInfo dephtStencilInfo;
+    std::vector<VkDynamicState> dynamicStateEnables;
+    VkPipelineDynamicStateCreateInfo dynamicStateInfo;
     VkPipelineLayout pipelineLayout = nullptr;
     VkRenderPass renderPass = nullptr;
     uint32_t subpass = 0;
@@ -31,7 +32,7 @@ class Pipeline {
         Pipeline(const Pipeline&) = delete;
         void operator=(const Pipeline&) = delete;
 
-        static PipelineConfigInfo DefaultPipelineConfigInfo(uint32_t width, uint32_t height);
+        static void DefaultPipelineConfigInfo(PipelineConfigInfo& configInfo);
 
         void Bind(VkCommandBuffer commandBuffer);
     
