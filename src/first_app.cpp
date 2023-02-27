@@ -1,9 +1,18 @@
 #include "include/first_app.hpp"
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+
 //std
 #include <array>
 
 namespace ember {
+
+    struct SimplePushConstantData {
+        glm::vec2 offset;
+        alignas(16) glm::vec3 colour;
+    };
 
     FirstApp::FirstApp() {
         LoadModels();
@@ -36,13 +45,19 @@ namespace ember {
     }
 
     void FirstApp::CreatePipelineLayout() {
+
+        VkPushConstantRange pushConstantRange;
+        pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+        pushConstantRange.offset = 0;
+        pushConstantRange.size = sizeof(SimplePushConstantData);
+
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutInfo.setLayoutCount = 0;
         pipelineLayoutInfo.pSetLayouts = NULL;
-        pipelineLayoutInfo.pushConstantRangeCount = 0;
-        pipelineLayoutInfo.pPushConstantRanges = NULL;
+        pipelineLayoutInfo.pushConstantRangeCount = 1;
+        pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
         if (vkCreatePipelineLayout(_device.GetDevice(), &pipelineLayoutInfo, NULL, &_pipelineLayout) != VK_SUCCESS) {
             std::runtime_error("Failed to create pipeline layout");
@@ -101,6 +116,9 @@ namespace ember {
     }
 
     void FirstApp::RecordCommandBuffer(int imageIndex) {
+        static int frame = 0;
+        frame = (frame + 1) % 1000;
+
         VkCommandBufferBeginInfo beginInfo {};
             beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -137,7 +155,18 @@ namespace ember {
 
             _pipeline->Bind(_commandBuffers[imageIndex]);
             _model->Bind(_commandBuffers[imageIndex]);
-            _model->Draw(_commandBuffers[imageIndex]);
+
+            for (int i = 0; i < 4; i++) {
+                SimplePushConstantData push{};
+                push.offset = {-0.5f + frame * 0.002f, -0.4f + i * 0.25f};
+                push.colour = {0.0f, 0.0f, 0.2f + 0.2f * i};
+
+                vkCmdPushConstants(_commandBuffers[imageIndex], _pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
+
+                _model->Draw(_commandBuffers[imageIndex]);
+            }
+
+            
 
             vkCmdEndRenderPass(_commandBuffers[imageIndex]);
             if (vkEndCommandBuffer(_commandBuffers[imageIndex]) != VK_SUCCESS) {
