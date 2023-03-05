@@ -10,7 +10,7 @@
 #include <memory>
 #include <vector>
 
-namespace ember {
+namespace vktut {
 class FirstApp {
 
     public:
@@ -35,7 +35,7 @@ class FirstApp {
         void RecreateSwapChain();
         void RecordCommandBuffer(int imageIndex);
 
-        Window _window{width, height, "Hi There matey"};
+        Window _window{width, height, "Hi There lad"};
         Device _device{_window};
         std::unique_ptr<SwapChain> _swapChain;
         std::unique_ptr<Pipeline> _pipeline;

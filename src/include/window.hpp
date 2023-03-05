@@ -5,7 +5,7 @@
 #include <string>
 #include <stdexcept>
 
-namespace ember {
+namespace vktut {
 
 class Window {
 

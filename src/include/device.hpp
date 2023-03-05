@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace ember {
+namespace vktut {
 
 struct SwapChainSupportDetails {
   VkSurfaceCapabilitiesKHR capabilities;

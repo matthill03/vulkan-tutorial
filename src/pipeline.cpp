@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <iostream>
 
-namespace ember {
+namespace vktut {
 
     Pipeline::Pipeline(Device& device, 
             const std::string& vertFilePath, 

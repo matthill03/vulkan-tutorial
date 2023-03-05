@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace ember {
+namespace vktut {
 
 struct PipelineConfigInfo {
     VkPipelineViewportStateCreateInfo viewportInfo;

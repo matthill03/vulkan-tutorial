@@ -3,7 +3,7 @@
 #include <cassert>
 #include <cstring>
 
-namespace ember {
+namespace vktut {
 
     Model::Model(Device& device, const std::vector<Vertex>& verticies) : _device{device} {
         CreateVertexBuffers(verticies);

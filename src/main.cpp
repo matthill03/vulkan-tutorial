@@ -6,7 +6,7 @@
 
 int main() {
 
-    ember::FirstApp app{};
+    vktut::FirstApp app{};
 
     try{
         app.Run();

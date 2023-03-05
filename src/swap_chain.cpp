@@ -9,7 +9,7 @@
 #include <set>
 #include <stdexcept>
 
-namespace ember {
+namespace vktut {
 
 SwapChain::SwapChain(Device &deviceRef, VkExtent2D windowExtent)
     : _device{deviceRef}, _windowExtent{windowExtent} {

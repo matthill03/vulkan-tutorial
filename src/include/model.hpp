@@ -8,7 +8,7 @@
 
 #include <vector>
 
-namespace ember {
+namespace vktut {
 class Model {
     public:
         struct Vertex

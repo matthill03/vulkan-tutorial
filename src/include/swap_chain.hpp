@@ -10,7 +10,7 @@
 #include <vector>
 #include <memory>
 
-namespace ember {
+namespace vktut {
 
 class SwapChain {
  public:

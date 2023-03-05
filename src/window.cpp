@@ -1,6 +1,6 @@
 #include "include/window.hpp"
 
-namespace ember {
+namespace vktut {
 
     Window::Window(int width, int height, std::string name) {
         _width = width;

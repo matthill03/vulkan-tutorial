@@ -7,9 +7,10 @@
 //std
 #include <array>
 
-namespace ember {
+namespace vktut {
 
     struct SimplePushConstantData {
+        glm::mat2 transform{1.f};
         glm::vec2 offset;
         alignas(16) glm::vec3 colour;
     };
