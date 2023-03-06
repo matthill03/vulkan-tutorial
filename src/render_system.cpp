@@ -11,8 +11,7 @@
 namespace vktut {
 
     struct SimplePushConstantData {
-        glm::mat2 transform{1.f};
-        glm::vec2 offset;
+        glm::mat4 transform{1.f};
         alignas(16) glm::vec3 colour;
     };
 
@@ -59,12 +58,12 @@ namespace vktut {
         _pipeline->Bind(commandBuffer);
 
         for(auto& object : gameObjects) {
-            object.transform2D.rotation = glm::mod(object.transform2D.rotation + 0.01f, glm::two_pi<float>());
+            object.transform.rotation.y = glm::mod(object.transform.rotation.y + 0.01f, glm::two_pi<float>());
+            object.transform.rotation.x = glm::mod(object.transform.rotation.x + 0.005f, glm::two_pi<float>());
 
             SimplePushConstantData push{};
-            push.offset = object.transform2D.translation;
             push.colour = object.colour;
-            push.transform = object.transform2D.mat2();
+            push.transform = object.transform.mat4();
 
             vkCmdPushConstants(commandBuffer, _pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
 
