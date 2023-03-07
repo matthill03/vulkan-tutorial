@@ -4,10 +4,22 @@
 #include "device.hpp"
 #include "game_object.hpp"
 #include "renderer.hpp"
+#include "render_system.hpp"
+#include "camera.hpp"
+#include "keyboard_movement_controller.hpp"
+
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 
 // std
 #include <memory>
 #include <vector>
+#include <array>
+#include <chrono>
+
+#define MAX_FRAME_TIME {0.5f}
 
 namespace vktut {
 class FirstApp {

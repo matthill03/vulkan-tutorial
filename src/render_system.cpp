@@ -1,13 +1,5 @@
 #include "include/render_system.hpp"
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
-#include <glm/gtc/constants.hpp>
-
-//std
-#include <array>
-
 namespace vktut {
 
     struct SimplePushConstantData {
@@ -60,9 +52,6 @@ namespace vktut {
         auto projectionView = camera.GetProjection() * camera.GetView();
 
         for(auto& object : gameObjects) {
-            object.transform.rotation.y = glm::mod(object.transform.rotation.y + 0.01f, glm::two_pi<float>());
-            object.transform.rotation.x = glm::mod(object.transform.rotation.x + 0.005f, glm::two_pi<float>());
-
             SimplePushConstantData push{};
             push.colour = object.colour;
             push.transform = projectionView * object.transform.mat4();
