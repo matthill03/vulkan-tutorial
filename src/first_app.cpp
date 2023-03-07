@@ -22,10 +22,14 @@ namespace vktut {
         RenderSystem renderSystem {_device, _renderer.GetSwapChainRenderPass()};
 
         Camera camera{};
-        camera.SetOthographicProjection(-1, 1, -1, 1, -1, 1);
+        float aspect = 0.0f;
 
         while (!_window.ShouldClose()) {
             glfwPollEvents();
+            aspect = _renderer.GetAspectRatio();
+            // camera.SetOthographicProjection(-aspect, aspect, -1, 1, -1, 1);
+            camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
+
 
             if (auto commandBuffer = _renderer.BeginFrame()) {
                 _renderer.BeginSwapChainRenderPass(commandBuffer);
@@ -102,7 +106,7 @@ namespace vktut {
 
         auto cube = GameObject::CreateGameObject();
         cube.model = model;
-        cube.transform.translation = {0.0f, 0.0f, 0.5f};
+        cube.transform.translation = {0.0f, 0.0f, 2.5f};
         cube.transform.scale = {0.5f, 0.5f, 0.5f};
 
         _gameObjects.push_back(std::move(cube));
