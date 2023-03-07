@@ -54,7 +54,7 @@ namespace vktut {
         _pipeline = std::make_unique<Pipeline>(_device, "src/shaders/simple_shader.vert.spv", "src/shaders/simple_shader.frag.spv", pipelineConfig);
     }
 
-    void RenderSystem::RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject> &gameObjects) {
+    void RenderSystem::RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject> &gameObjects, const Camera& camera) {
         _pipeline->Bind(commandBuffer);
 
         for(auto& object : gameObjects) {
@@ -63,7 +63,7 @@ namespace vktut {
 
             SimplePushConstantData push{};
             push.colour = object.colour;
-            push.transform = object.transform.mat4();
+            push.transform = camera.GetProjection() * object.transform.mat4();
 
             vkCmdPushConstants(commandBuffer, _pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
 

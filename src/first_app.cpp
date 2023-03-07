@@ -1,5 +1,6 @@
 #include "include/first_app.hpp"
 #include "include/render_system.hpp"
+#include "include/camera.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -20,12 +21,15 @@ namespace vktut {
     void FirstApp::Run() {
         RenderSystem renderSystem {_device, _renderer.GetSwapChainRenderPass()};
 
+        Camera camera{};
+        camera.SetOthographicProjection(-1, 1, -1, 1, -1, 1);
+
         while (!_window.ShouldClose()) {
             glfwPollEvents();
 
             if (auto commandBuffer = _renderer.BeginFrame()) {
                 _renderer.BeginSwapChainRenderPass(commandBuffer);
-                renderSystem.RenderGameObjects(commandBuffer, _gameObjects);
+                renderSystem.RenderGameObjects(commandBuffer, _gameObjects, camera);
                 _renderer.EndSwapChainRenderPass(commandBuffer);
                 _renderer.EndFrame();
             }
