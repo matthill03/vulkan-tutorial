@@ -57,13 +57,15 @@ namespace vktut {
     void RenderSystem::RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject> &gameObjects, const Camera& camera) {
         _pipeline->Bind(commandBuffer);
 
+        auto projectionView = camera.GetProjection() * camera.GetView();
+
         for(auto& object : gameObjects) {
             object.transform.rotation.y = glm::mod(object.transform.rotation.y + 0.01f, glm::two_pi<float>());
             object.transform.rotation.x = glm::mod(object.transform.rotation.x + 0.005f, glm::two_pi<float>());
 
             SimplePushConstantData push{};
             push.colour = object.colour;
-            push.transform = camera.GetProjection() * object.transform.mat4();
+            push.transform = projectionView * object.transform.mat4();
 
             vkCmdPushConstants(commandBuffer, _pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
 
