@@ -4,7 +4,7 @@ namespace vktut {
 
     struct SimplePushConstantData {
         glm::mat4 transform{1.f};
-        alignas(16) glm::vec3 colour;
+        glm::mat4 modelMatrix{1.f};
     };
 
     RenderSystem::RenderSystem(Device& device, VkRenderPass renderPass) : _device{device} {
@@ -53,8 +53,9 @@ namespace vktut {
 
         for(auto& object : gameObjects) {
             SimplePushConstantData push{};
-            push.colour = object.colour;
+            auto modelMatrix = object.transform.mat4();
             push.transform = projectionView * object.transform.mat4();
+            push.modelMatrix = modelMatrix;
 
             vkCmdPushConstants(commandBuffer, _pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
 
