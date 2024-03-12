@@ -1,3 +1,4 @@
+#include <cstring>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -8,6 +9,20 @@
 #include <exception>
 #include <iostream>
 #include <cstdlib>
+#include <vector>
+
+// Set validation that will be used if NDEBUG is not set
+const std::vector<const char*> validationLayers = {
+  "VK_LAYER_KHRONOS_validation"
+
+};
+
+// Use pre-processor if to set validation layers on or not
+#ifdef NDEBUG
+  const bool enableValidationLayers = false;
+#else
+  const bool enableValidationLayers = true;
+#endif // NDEBUG
 
 // Create class for the application
 class VulkanTutorialApplication {
@@ -53,6 +68,11 @@ private:
 
   // Initialze createInstance()
   void createInstance() {
+    // Check if request validation layers are available
+    if (enableValidationLayers && !checkValidationLayerSupport()) {
+      throw std::runtime_error("ERROR: Validation layers requested, but not available!");
+    }
+
     // Define application info struct and initialize with info
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -76,8 +96,13 @@ private:
     createInfo.enabledExtensionCount = glfwExtensionCount;
     createInfo.ppEnabledExtensionNames = glfwExtensions;
 
-    // Specify validation layers to enable
-    createInfo.enabledLayerCount = 0;
+    // enable validation layers specified at the top of the file
+    if (enableValidationLayers) {
+      createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+      createInfo.ppEnabledLayerNames = validationLayers.data();
+    } else {
+      createInfo.enabledLayerCount = 0;
+    }
 
     // Create a Vulkan Instance + check for successful creation
     if (vkCreateInstance(&createInfo, nullptr, &_instance) != VK_SUCCESS) {
@@ -104,6 +129,39 @@ private:
 
     // Terminate GLFW instance
     glfwTerminate();
+  }
+
+  // Initalize checkValidationLayerSupport()
+  bool checkValidationLayerSupport() {
+    // Define var for num of layers available
+    uint32_t layerCount;
+    // Find cound of all available layers
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+    // Get all the available layers name and store in vector
+    std::vector<VkLayerProperties> availableLayers(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+    // Check all selected layers to see if they are in the available layers
+    for (const char* layerName : validationLayers) {
+      bool layerFound = false;
+
+      for (const auto& layerProperties : availableLayers) {
+        std::cout << layerName << " -> " << layerProperties.layerName << std::endl;;
+        if (strcmp(layerName, layerProperties.layerName) == 0){
+          layerFound = true;
+          break;
+        }
+      }
+
+      // return false if layer is not available
+      if (!layerFound) {
+        return false;
+      }
+    }
+
+    // return true if all layers are available
+    return true;
   }
 };
 
