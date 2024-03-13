@@ -77,6 +77,12 @@ private:
   // Define the physical device handle
   VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
 
+  // Define handle for logical device
+  VkDevice _device;
+
+  // Define handle for graphics queue
+  VkQueue _graphicsQueue;
+
   // Define struct for all required queue families
   struct QueueFamilyIndicies {
     std::optional<uint32_t> graphicsFamily;
@@ -106,6 +112,7 @@ private:
     createInstance();
     setupDebugMessenger();
     pickPhysicalDevice();
+    createLogicalDevice();
   }
 
   // Initialze createInstance()
@@ -262,6 +269,55 @@ private:
     return indices.isComplete();
   }
 
+  void createLogicalDevice() {
+    // Find all available queue families
+    QueueFamilyIndicies indices = findQueueFamilies(_physicalDevice);
+
+    // Specify queue info we want to use
+    VkDeviceQueueCreateInfo queueCreateInfo{};
+    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+    queueCreateInfo.queueCount = 1;
+
+    // Set priority for queues
+    float queuePriority = 1.0f;
+    queueCreateInfo.pQueuePriorities = &queuePriority;
+
+    // Specify device features we want to use
+    VkPhysicalDeviceFeatures deviceFeatures{};
+
+    // Create info for logical device creation
+    VkDeviceCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+
+    // Set queus for logical device
+    createInfo.pQueueCreateInfos = &queueCreateInfo;
+    createInfo.queueCreateInfoCount = 1;
+
+    // Set features for logical device
+    createInfo.pEnabledFeatures = &deviceFeatures;
+
+    // Extensions and validation layers for logical device
+    // NOTE - This is not needed for newer versions of Vulkan
+    createInfo.enabledExtensionCount = 0;
+
+    if (enableValidationLayers) {
+      createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+      createInfo.ppEnabledLayerNames = validationLayers.data();
+    } else {
+      createInfo.enabledLayerCount = 0;
+    }
+
+    // Create logical device
+    if (vkCreateDevice(_physicalDevice, &createInfo, nullptr, &_device) != VK_SUCCESS) {
+      throw std::runtime_error("Failed to create logical device!!!");
+    }
+
+    // Set handle for graphics queue
+    vkGetDeviceQueue(_device, indices.graphicsFamily.value(), 0, &_graphicsQueue);
+
+  }
+
   // Initialze mainLoop()
   void mainLoop() {
     // Keep app running until error or window is closed
@@ -273,6 +329,8 @@ private:
 
   // Initialze cleanup()
   void cleanup() {
+    // Destroy logical device
+    vkDestroyDevice(_device, nullptr);
 
     // If validation layers are enabled clean up messenger callback
     if (enableValidationLayers) {
