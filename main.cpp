@@ -1,15 +1,16 @@
-#include <cstring>
-#include <vulkan/vk_platform.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 #include <vulkan/vulkan_core.h>
+#include <vulkan/vk_platform.h>
 
 #include <cstdint>
 #include <stdexcept>
 #include <iostream>
 #include <cstdlib>
 #include <vector>
+#include <cstring>
+#include <optional>
 
 // Set validation that will be used if NDEBUG is not set
 const std::vector<const char*> validationLayers = {
@@ -70,7 +71,21 @@ private:
   // Define Vulkan instance variable
   VkInstance _instance;
 
+  // Define the custom debug and message handler
   VkDebugUtilsMessengerEXT _debugMessenger;
+
+  // Define the physical device handle
+  VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
+
+  // Define struct for all required queue families
+  struct QueueFamilyIndicies {
+    std::optional<uint32_t> graphicsFamily;
+
+    // Function for checking if all needed families are found
+    bool isComplete() {
+      return graphicsFamily.has_value();
+    }
+  };
 
   // Initialze initWindow()
   void initWindow() {
@@ -90,6 +105,7 @@ private:
   void initVulkan() {
     createInstance();
     setupDebugMessenger();
+    pickPhysicalDevice();
   }
 
   // Initialze createInstance()
@@ -166,6 +182,84 @@ private:
       throw std::runtime_error("failed to set up debug messenger!");
     } 
 
+  }
+
+  // Initialise function for find all available queue families
+  QueueFamilyIndicies findQueueFamilies(VkPhysicalDevice device) {
+    QueueFamilyIndicies indices;
+
+    // Find number of available queue families
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+    // Find all available queue families
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+    // Check if family has needed queue in it
+    int i = 0;
+    for (const auto& queueFamily : queueFamilies) {
+      if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+        indices.graphicsFamily = i;
+        std::cout << "Graphics Family found, at index: " << i << std::endl;
+      }
+
+      // early exit if all queues are found
+      if (indices.isComplete()) {
+        break;
+      }
+
+      i++;
+    }
+
+    return indices;
+  }
+
+  // Initialse function to find a suitable GPU
+  void pickPhysicalDevice() {
+    // Find number of all the devices available
+    uint32_t deviceCount = 0;
+    vkEnumeratePhysicalDevices(_instance, &deviceCount, nullptr);
+
+    // If no Vulkan supported GPUs found exit
+    if (deviceCount == 0) {
+      throw std::runtime_error("Failed to find GPUs with Vulkan support!!");
+    }
+
+    // Allocate all available devices into list
+    std::vector<VkPhysicalDevice> devices(deviceCount);
+    vkEnumeratePhysicalDevices(_instance, &deviceCount, devices.data());
+
+    // Find a suitable GPU with conditions we set
+    for (const auto& device : devices) {
+      if (isDeviceSuitable(device)) {
+        _physicalDevice = device;
+        break;
+      }
+    }    
+
+    // If no suitable GPU, throw error
+    if (_physicalDevice == VK_NULL_HANDLE) {
+      throw std::runtime_error("Failed to find a suitable GPU!!");
+    }
+  }
+
+  // Initialse function to check if physical device is suitable
+  bool isDeviceSuitable(VkPhysicalDevice device) {
+    // Get all device properties and features supported
+    VkPhysicalDeviceProperties deviceProperties;
+    VkPhysicalDeviceFeatures deviceFeatures;
+
+    vkGetPhysicalDeviceProperties(device, &deviceProperties);
+    vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+    // Print out device names
+    std::cout << "DEVICE: " << deviceProperties.deviceName << std::endl;
+
+    // Check if physical device supports needed queue families
+    QueueFamilyIndicies indices = findQueueFamilies(device);
+
+    return indices.isComplete();
   }
 
   // Initialze mainLoop()
