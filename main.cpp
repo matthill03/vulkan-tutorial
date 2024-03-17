@@ -20,6 +20,12 @@
 
   };
 
+  // Set device extensions vector to list all wanted device extensions
+  // NOTE: Uses macro for extension name to reduce risk of typo
+  const std::vector<const char*> deviceExtensions = {
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME
+  };
+
   // Use pre-processor if to set validation layers on or not
 #ifdef NDEBUG
     const bool enableValidationLayers = false;
@@ -274,6 +280,23 @@
     }
   }
 
+  bool checkDeviceExtensionSupport(VkPhysicalDevice device) {
+    uint32_t extensionCount;
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+
+    std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+
+    std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+
+    for (const auto &extension : availableExtensions) {
+      requiredExtensions.erase(extension.extensionName);
+    }
+
+    return requiredExtensions.empty();
+
+  }
+
   // Initialse function to check if physical device is suitable
   bool isDeviceSuitable(VkPhysicalDevice device) {
     // Get all device properties and features supported
@@ -289,7 +312,9 @@
     // Check if physical device supports needed queue families
     QueueFamilyIndicies indices = findQueueFamilies(device);
 
-    return indices.isComplete();
+    bool extensionsSupported = checkDeviceExtensionSupport(device);
+
+    return indices.isComplete() && extensionsSupported;
   }
 
   void createLogicalDevice() {
